@@ -1,0 +1,8 @@
+{
+    "wsl_distro": "Ubuntu-22.04",
+    "openfoam_version": "10",
+    "openfoam_bashrc": "/opt/openfoam10/etc/bashrc",
+    "default_case_path": "",
+    "paraview_path": "",
+    "recent_cases": []
+}
