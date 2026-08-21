@@ -1,118 +1,116 @@
+<div align="center">
+
 # winFOAM
 
-**Windows-native OpenFOAM GUI** — A modern, ImGui-based desktop application for Computational Fluid Dynamics (CFD) pre-processing, solving, and post-processing on Windows with WSL2 backend.
+### *Modern, Native Windows GUI for OpenFOAM via WSL2*
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6.svg?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
+[![Backend](https://img.shields.io/badge/Backend-WSL2%20%7C%20Ubuntu-E95420.svg?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-F59E0B.svg?style=for-the-badge)](#-roadmap)
 
-- **Native Windows UI** — Built with Dear ImGui + ImPlot for responsive, GPU-accelerated interface
-- **WSL2 Integration** — Seamless execution of OpenFOAM solvers (`blockMesh`, `simpleFoam`, `snappyHexMesh`, etc.) via WSL
-- **Case Management** — Visual setup of `controlDict`, `fvSchemes`, `fvSolution`, boundary conditions
-- **Live Residual Plotting** — Real-time convergence monitoring with ImPlot
-- **3D Mesh Viewport** — VTK-powered mesh visualization and inspection
-- **Dictionary Templates** — Built-in OpenFOAM dictionary templates for rapid case setup
+<br/>
 
-## Architecture
+<p align="center">
+  A responsive Windows interface engineered to streamline CFD case configuration, meshing, solver execution, and post-processing without leaving the Windows desktop.
+</p>
 
+[Architecture](#-architecture) •
+[Features](#-planned-features) •
+[Prerequisites](#-prerequisites) •
+[Quick Setup](#-quick-setup) 
+
+</div>
+
+---
+
+## ⚡ Why winFOAM?
+
+Running OpenFOAM directly on Windows historically required cumbersome virtual machines or unmaintained native builds. **winFOAM** offers a high-performance alternative:
+
+* **Native Desktop Experience**: Intuitive GUI built with Python and Qt running directly on Windows.
+* **Full Linux Compute Efficiency**: OpenFOAM solvers and meshing tools run natively inside WSL2 with optimal CPU, RAM, and MPI scalability.
+* **Zero I/O Bottlenecks**: Case directories are managed on WSL2 native ext4 storage (`\\wsl$\...`), completely bypassing the performance degradation of cross-drive mounting (`/mnt/c/`).
+
+---
+
+## 🏗 Architecture
+
+```mermaid
+graph TD
+    subgraph Windows [" ❖ WINDOWS HOST "]
+        UI["<b>winFOAM Desktop App</b><br/>(C / Qt6)"]
+        UI --> F1["Case Configurator & Boundary Setup"]
+        UI --> F2["Mesh Setup (cfMesh / snappyHexMesh)"]
+        UI --> F3["Real-time Residual & Log Viewer"]
+        UI --> F4["3D Geometry & Native ParaView Bridge"]
+    end
+
+    subgraph WSL [" 🐧 WSL2 BACKEND (Ubuntu) "]
+        Core["<b>OpenFOAM Engines</b><br/>(ESI / Foundation)"]
+        Core --> B1["Parallel MPI Execution"]
+        Core --> B2["Fast ext4 Native I/O"]
+    end
+
+    Windows <== "WSL2 Bridge & CLI Execution" ==> WSL
 ```
-winFOAM/
-├── include/core/      # Backend: WSL bridge, case I/O, threading
-├── include/gui/       # Frontend: ImGui panels, viewport, charts
-├── src/               # Implementation
-├── vendor/            # ImGui, ImPlot, GLFW, stb (git submodules)
-├── assets/            # Fonts, icons, themes
-├── resources/         # OpenFOAM dictionary templates
-├── scripts/           # WSL setup & utility wrappers
-└── docs/              # Technical documentation
-```
 
-## Requirements
+---
 
-- **Windows 10/11** with **WSL2** (Ubuntu 22.04+ recommended)
-- **OpenFOAM v10+** installed inside WSL
-- **CMake 3.20+**, **Ninja**, **C++20 compiler** (MSVC 19.35+ / GCC 11+ / Clang 14+)
-- **VTK 9+** (for 3D viewport)
-- **GPU** with OpenGL 3.3+ support
+## 🚀 Planned Features
 
-## Building
+* 🎛 **Case Setup Assistant** — Configure boundary conditions, initial fields (`0/`), turbulence models, and numerical schemes (`fvSchemes`, `fvSolution`).
+* 🕸 **Integrated Meshing** — Full visual setup for both **cfMesh** and **snappyHexMesh** pipelines.
+* 👁 **Geometry Inspection** — Fast 3D viewer for surface files (`.stl`, `.obj`).
+* ⚡ **WSL2 Process Manager** — Single-click background solving, multi-core decomposition (`decomposePar`), and real-time residual plotting.
+* 📊 **ParaView Integration** — Automatic `.foam` case generation and one-click launch with Windows-native ParaView.
 
-```bash
-# Clone with submodules
-git clone --recursive https://github.com/yourorg/winFOAM.git
-cd winFOAM
+---
 
-# Configure (Debug)
-cmake --preset debug
+## 📦 Prerequisites
 
-# Build
-cmake --build --preset build-debug
+| Environment | Component | Requirement / Recommendation |
+| :--- | :--- | :--- |
+| **Windows Host** | Operating System | Windows 10 (Build 19041+) or Windows 11 (64-bit) |
+| | Runtime | Python 3.10 or newer |
+| | Virtualization | WSL2 enabled |
+| | Post-Processing | [ParaView for Windows](https://www.paraview.org/download/) |
+| **WSL2 Backend** | Linux Distribution | Ubuntu 22.04 LTS (or newer) |
+| | CFD Solver | OpenFOAM (ESI-OpenCFD or OpenFOAM Foundation) |
+| | Meshing Packages | `snappyHexMesh`, `cfMesh`, `Gmsh`, and additional meshing tools|
 
-# Run
-./build/debug/bin/winFOAM.exe
-```
+---
 
-### Using CMake Presets
+## 🛠 Quick Setup
 
-| Preset | Description |
-|--------|-------------|
-| `debug` | Debug with ASan/UBSan |
-| `release` | Optimized `-O3` |
-| `relwithdebinfo` | Optimized with debug symbols |
-
-## First Run Setup
-
-1. **Install WSL2 & Ubuntu**: `wsl --install -d Ubuntu-22.04`
-2. **Install OpenFOAM in WSL**:
-   ```bash
-   # Inside WSL
-   sudo apt update && sudo apt install -y openfoam10
-   echo "source /opt/openfoam10/etc/bashrc" >> ~/.bashrc
-   source ~/.bashrc
+1. **Clone the repository**
+   ```powershell
+   git clone [https://github.com/dentydinh/winFOAM.git](https://github.com/dentydinh/winFOAM.git)
+   cd winFOAM
    ```
-3. **Configure winFOAM**: On first launch, set WSL distro name and OpenFOAM version in *Settings → Backend*.
 
-## Project Structure
+2. **Configure Python virtual environment**
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-| Directory | Purpose |
-|-----------|---------|
-| `include/core/` | Backend headers (ThreadPool, WslBridge, CaseExporter, CaseParser) |
-| `include/gui/` | Frontend headers (Application, Workbench, PreProcessing, Solutions, PostProcessing, Viewport) |
-| `src/` | `.cpp` implementations matching headers |
-| `vendor/` | Git submodules: imgui, implot, glfw, stb |
-| `assets/themes/` | ImGui style presets (Dark, Light, Dracula, etc.) |
-| `resources/templates/` | OpenFOAM dictionary templates |
-| `scripts/` | `setup_env.bat` (Windows), `wsl_deploy.sh` (WSL), `foam_utils.sh` (solver wrappers) |
+3. **Verify WSL status**
+   ```powershell
+   wsl --status
+   ```
 
-## Key Classes
+---
 
-| Class | File | Responsibility |
-|-------|------|----------------|
-| `ThreadPool` | `core/ThreadPool.hpp` | Async task queue for long-running WSL commands |
-| `WslBridge` | `core/WslBridge.hpp` | Execute commands in WSL, capture stdout/stderr |
-| `CaseExporter` | `core/CaseExporter.hpp` | Write OpenFOAM dictionaries from UI state |
-| `CaseParser` | `core/CaseParser.hpp` | Parse log files, extract residuals, mesh stats |
-| `Application` | `gui/Application.hpp` | Main loop, GLFW/ImGui initialization |
-| `Workbench` | `gui/Workbench.hpp` | Dockspace, menu bar, panel layout |
-| `PreProcessing` | `gui/PreProcessing.hpp` | Mesh generation, boundary condition panels |
-| `Solutions` | `gui/Solutions.hpp` | Solver selection, fvSchemes/fvSolution editors |
-| `PostProcessing` | `gui/PostProcessing.hpp` | Residual charts (ImPlot), surface/volume data |
-| `Viewport` | `gui/Viewport.hpp` | VTK 3D mesh rendering widget |
+## 📄 License
 
-## License
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for complete terms.
 
-MIT License — see [LICENSE](LICENSE) for details.
+---
 
-## Contributing
+## 🙏 Acknowledgements
 
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with clang-format compliance
-4. Run tests: `cmake --build --preset build-debug --target test`
-5. Submit PR
-
-## Roadmap
-
-- [ ] snappyHexMesh visual configuration
-- [ ] Parallel run monitoring (decomposePar / reconstructPar)
-- [ ] Python scripting API for automation
-- [ ] Cloud HPC integration (Azure/AWS batch)
-- [ ] Plugin system for custom solvers
+* Inspired by the open-source CFD community and my colleague.
+* Special thanks to the OpenFOAM Foundation and OpenCFD Ltd. for maintaining the OpenFOAM solver ecosystem.
+````
